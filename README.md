@@ -84,8 +84,8 @@ See wiki [Software installation](../../wiki/Software-installation)
 This project uses libraries and code by different authors:
 - WiFiManager by @tzapu (tested with version 0.12.0)
   https://github.com/tzapu/WiFiManager
-- WS2812FX by @kitesurfer1404 (tested with version downloaded 2017-02-05)
-  https://github.com/kitesurfer1404/WS2812FX
+- WS2801FX by @debsahu (tested with version downloaded 2017-02-05)
+  https://github.com/debsahu/WS2801FX
 - WebSockets by @Links2004 (tested with version 2.0.6)
   https://github.com/Links2004/arduinoWebSockets
 - Adafruit NeoPixel by @adafruit (tested with 1.1.2)
