@@ -1,14 +1,15 @@
-#define LED_DATA_PIN 12
-#define LED_CLOCK_PIN 14
-#define NUMLEDS 300      // Number of leds in the strip
-//#define BUILTIN_LED 2    // ESP-12F has the built in LED on GPIO2, see https://github.com/esp8266/Arduino/issues/2192
-#define BUTTON 0         // Input pin (4 / D2) for switching the LED strip on / off, connect this PIN to ground to trigger button.
+#define LED_DATA_PIN 12  // WS2801 Data pin
+#define LED_CLOCK_PIN 14 // WS2801 Clock pin
+#define NUMLEDS 24       // Number of leds in the strip
+#define BUILTIN_LED 2    // ESP-12F has the built in LED on GPIO2, see https://github.com/esp8266/Arduino/issues/2192
+#define BUTTON 4         // Input pin (4 / D2) for switching the LED strip on / off, connect this PIN to ground to trigger button.
 
 const char HOSTNAME[] = "McLighting01";   // Friedly hostname
 
 #define ENABLE_OTA    // If defined, enable Arduino OTA code.
 #define ENABLE_MQTT   // If defined, enable MQTT client code, see: https://github.com/toblum/McLighting/wiki/MQTT-API
-//#define ENABLE_BUTTON  // If defined, enable button handling code, see: https://github.com/toblum/McLighting/wiki/Button-control
+#define ENABLE_HOMEASSISTANT // If defined, enable Homeassistant integration, ENABLE_MQTT must be active
+// #define ENABLE_BUTTON  // If defined, enable button handling code, see: https://github.com/toblum/McLighting/wiki/Button-control
 
 // parameters for automatically cycling favorite patterns
 uint32_t autoParams[][4] = {   // color, speed, mode, duration (seconds)
@@ -26,21 +27,23 @@ uint32_t autoParams[][4] = {   // color, speed, mode, duration (seconds)
   char mqtt_intopic[strlen(HOSTNAME) + 4 + 5];      // Topic in will be: <HOSTNAME>/in
   char mqtt_outtopic[strlen(HOSTNAME) + 5 + 5];     // Topic out will be: <HOSTNAME>/out
 
-  String mqtt_ha = "home/" + String(HOSTNAME) + "_ha/";
-  String mqtt_ha_state_in = mqtt_ha + "state/in";
-  String mqtt_ha_state_out = mqtt_ha + "state/out";
-  String mqtt_ha_speed = mqtt_ha + "speed";
-
-  const char* on_cmd = "ON";
-  const char* off_cmd = "OFF";
-  bool stateOn = false;
-  bool animation_on = false;
-  String effectString = "Static";
+  #ifdef ENABLE_HOMEASSISTANT
+    String mqtt_ha = "home/" + String(HOSTNAME) + "_ha/";
+    String mqtt_ha_state_in = mqtt_ha + "state/in";
+    String mqtt_ha_state_out = mqtt_ha + "state/out";
+    String mqtt_ha_speed = mqtt_ha + "speed";
+  
+    const char* on_cmd = "ON";
+    const char* off_cmd = "OFF";
+    bool stateOn = false;
+    bool animation_on = false;
+    String effectString = "Static";
+  #endif
 
   const char mqtt_clientid[] = "NeoPixelsStrip"; // MQTT ClientID
 
-  char mqtt_host[64] = "192.168.1.1";
-  char mqtt_port[6] = "1883";
+  char mqtt_host[64] = "";
+  char mqtt_port[6] = "";
   char mqtt_user[32] = "";
   char mqtt_pass[32] = "";
 #endif
