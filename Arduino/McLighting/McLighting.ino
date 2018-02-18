@@ -35,34 +35,18 @@
   PubSubClient mqtt_client(espClient);
 #endif
 
-
 // ***************************************************************************
 // Instanciate HTTP(80) / WebSockets(81) Server
 // ***************************************************************************
 ESP8266WebServer server(80);
 WebSocketsServer webSocket = WebSocketsServer(81);
 
-
 // ***************************************************************************
-// Load libraries / Instanciate WS2812FX library
+// Load libraries / Instanciate WS2801FX library
 // ***************************************************************************
-// https://github.com/kitesurfer1404/WS2812FX
-#include <WS2812FX.h>
-WS2812FX strip = WS2812FX(NUMLEDS, PIN, NEO_GRB + NEO_KHZ800);
-
-// Parameter 1 = number of pixels in strip
-// Parameter 2 = Arduino pin number (most are valid)
-// Parameter 3 = pixel type flags, add together as needed:
-//   NEO_KHZ800  800 KHz bitstream (most NeoPixel products w/WS2812 LEDs)
-//   NEO_KHZ400  400 KHz (classic 'v1' (not v2) FLORA pixels, WS2811 drivers)
-//   NEO_GRB     Pixels are wired for GRB bitstream (most NeoPixel products)
-//   NEO_RGB     Pixels are wired for RGB bitstream (v1 FLORA pixels, not v2)
-
-// IMPORTANT: To reduce NeoPixel burnout risk, add 1000 uF capacitor across
-// pixel power leads, add 300 - 500 Ohm resistor on first pixel's data input
-// and minimize distance between Arduino and first pixel.  Avoid connecting
-// on a live circuit...if you must, connect GND first.
-
+// https://github.com/debsahu/WS2801FX
+#include <WS2801FX.h>
+WS2801FX strip = WS2801FX(NUMLEDS, LED_DATA_PIN, LED_CLOCK_PIN, WS2801_RBG);
 
 // ***************************************************************************
 // Load library "ticker" for blinking status led
@@ -76,7 +60,6 @@ void tick()
   int state = digitalRead(BUILTIN_LED);  // get the current state of GPIO1 pin
   digitalWrite(BUILTIN_LED, !state);     // set pin to the opposite state
 }
-
 
 // ***************************************************************************
 // EEPROM helper
@@ -103,7 +86,6 @@ void writeEEPROM(int offset, int len, String value) {
     }
   }
 }
-
 
 // ***************************************************************************
 // Saved state handling
