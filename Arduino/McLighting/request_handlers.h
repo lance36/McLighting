@@ -330,137 +330,6 @@ void handleAutoStop() {
 }
 
 // ***************************************************************************
-// WS request handlers
-// ***************************************************************************
-void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t lenght) {
-  switch (type) {
-    case WStype_DISCONNECTED:
-      DBG_OUTPUT_PORT.printf("WS: [%u] Disconnected!\n", num);
-      break;
-
-    case WStype_CONNECTED: {
-        IPAddress ip = webSocket.remoteIP(num);
-        DBG_OUTPUT_PORT.printf("WS: [%u] Connected from %d.%d.%d.%d url: %s\n", num, ip[0], ip[1], ip[2], ip[3], payload);
-
-        // send message to client
-        webSocket.sendTXT(num, "Connected");
-      }
-      break;
-
-    case WStype_TEXT:
-      DBG_OUTPUT_PORT.printf("WS: [%u] get Text: %s\n", num, payload);
-
-      // # ==> Set main color
-      if (payload[0] == '#') {
-        handleSetMainColor(payload);
-        DBG_OUTPUT_PORT.printf("Set main color to: [%u] [%u] [%u]\n", main_color.red, main_color.green, main_color.blue);
-        webSocket.sendTXT(num, "OK");
-      }
-
-      // ? ==> Set speed
-      if (payload[0] == '?') {
-        uint8_t d = (uint8_t) strtol((const char *) &payload[1], NULL, 10);
-        ws2812fx_speed = constrain(d, 0, 255);
-        strip.setSpeed(convertSpeed(ws2812fx_speed));
-        DBG_OUTPUT_PORT.printf("WS: Set speed to: [%u]\n", ws2812fx_speed);
-        webSocket.sendTXT(num, "OK");
-      }
-
-      // % ==> Set brightness
-      if (payload[0] == '%') {
-        uint8_t b = (uint8_t) strtol((const char *) &payload[1], NULL, 10);
-        brightness = ((b >> 0) & 0xFF);
-        DBG_OUTPUT_PORT.printf("WS: Set brightness to: [%u]\n", brightness);
-        strip.setBrightness(brightness);
-        webSocket.sendTXT(num, "OK");
-      }
-
-      // * ==> Set main color and light all LEDs (Shortcut)
-      if (payload[0] == '*') {
-        handleSetAllMode(payload);
-        webSocket.sendTXT(num, "OK");
-      }
-
-      // ! ==> Set single LED in given color
-      if (payload[0] == '!') {
-        handleSetSingleLED(payload, 1);
-        webSocket.sendTXT(num, "OK");
-      }
-
-      // + ==> Set multiple LED in the given colors
-      if (payload[0] == '+') {
-        handleSetDifferentColors(payload);
-        webSocket.sendTXT(num, "OK");
-      }
-
-      // + ==> Set range of LEDs in the given color
-      if (payload[0] == 'R') {
-        handleRangeDifferentColors(payload);
-        webSocket.sendTXT(num, "OK");
-      }
-
-      // = ==> Activate named mode
-      if (payload[0] == '=') {
-        // we get mode data
-        String str_mode = String((char *) &payload[0]);
-
-        handleSetNamedMode(str_mode);
-
-        DBG_OUTPUT_PORT.printf("Activated mode [%u]!\n", mode);
-        webSocket.sendTXT(num, "OK");
-      }
-
-      // $ ==> Get status Info.
-      if (payload[0] == '$') {
-        DBG_OUTPUT_PORT.printf("Get status info.");
-
-        String json = listStatusJSON();
-        DBG_OUTPUT_PORT.println(json);
-        webSocket.sendTXT(num, json);
-      }
-
-      // ~ ==> Get WS2812 modes.
-      if (payload[0] == '~') {
-        DBG_OUTPUT_PORT.printf("Get WS2812 modes.");
-
-        String json = listModesJSON();
-        DBG_OUTPUT_PORT.println(json);
-        webSocket.sendTXT(num, json);
-      }
-
-      // / ==> Set WS2812 mode.
-      if (payload[0] == '/') {
-        handleSetWS2812FXMode(payload);
-        webSocket.sendTXT(num, "OK");
-      }
-
-      // start auto cycling
-      if (strcmp((char *)payload, "start") == 0 ) {
-        handleAutoStart();
-        webSocket.sendTXT(num, "OK");
-      }
-
-      // stop auto cycling
-      if (strcmp((char *)payload, "stop") == 0 ) {
-        handleAutoStop();
-        webSocket.sendTXT(num, "OK");
-      }
-      
-      #ifdef ENABLE_HOMEASSISTANT
-        sendState();
-      #endif
-      
-      break;
-  }
-}
-
-void checkForRequests() {
-  webSocket.loop();
-  server.handleClient();
-}
-
-
-// ***************************************************************************
 // MQTT callback / connection handler
 // ***************************************************************************
 #ifdef ENABLE_MQTT
@@ -770,6 +639,137 @@ void checkForRequests() {
     }
   }
 #endif
+a
+// ***************************************************************************
+// WS request handlers
+// ***************************************************************************
+void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t lenght) {
+  switch (type) {
+    case WStype_DISCONNECTED:
+      DBG_OUTPUT_PORT.printf("WS: [%u] Disconnected!\n", num);
+      break;
+
+    case WStype_CONNECTED: {
+        IPAddress ip = webSocket.remoteIP(num);
+        DBG_OUTPUT_PORT.printf("WS: [%u] Connected from %d.%d.%d.%d url: %s\n", num, ip[0], ip[1], ip[2], ip[3], payload);
+
+        // send message to client
+        webSocket.sendTXT(num, "Connected");
+      }
+      break;
+
+    case WStype_TEXT:
+      DBG_OUTPUT_PORT.printf("WS: [%u] get Text: %s\n", num, payload);
+
+      // # ==> Set main color
+      if (payload[0] == '#') {
+        handleSetMainColor(payload);
+        DBG_OUTPUT_PORT.printf("Set main color to: [%u] [%u] [%u]\n", main_color.red, main_color.green, main_color.blue);
+        webSocket.sendTXT(num, "OK");
+      }
+
+      // ? ==> Set speed
+      if (payload[0] == '?') {
+        uint8_t d = (uint8_t) strtol((const char *) &payload[1], NULL, 10);
+        ws2812fx_speed = constrain(d, 0, 255);
+        strip.setSpeed(convertSpeed(ws2812fx_speed));
+        DBG_OUTPUT_PORT.printf("WS: Set speed to: [%u]\n", ws2812fx_speed);
+        webSocket.sendTXT(num, "OK");
+      }
+
+      // % ==> Set brightness
+      if (payload[0] == '%') {
+        uint8_t b = (uint8_t) strtol((const char *) &payload[1], NULL, 10);
+        brightness = ((b >> 0) & 0xFF);
+        DBG_OUTPUT_PORT.printf("WS: Set brightness to: [%u]\n", brightness);
+        strip.setBrightness(brightness);
+        webSocket.sendTXT(num, "OK");
+      }
+
+      // * ==> Set main color and light all LEDs (Shortcut)
+      if (payload[0] == '*') {
+        handleSetAllMode(payload);
+        webSocket.sendTXT(num, "OK");
+      }
+
+      // ! ==> Set single LED in given color
+      if (payload[0] == '!') {
+        handleSetSingleLED(payload, 1);
+        webSocket.sendTXT(num, "OK");
+      }
+
+      // + ==> Set multiple LED in the given colors
+      if (payload[0] == '+') {
+        handleSetDifferentColors(payload);
+        webSocket.sendTXT(num, "OK");
+      }
+
+      // + ==> Set range of LEDs in the given color
+      if (payload[0] == 'R') {
+        handleRangeDifferentColors(payload);
+        webSocket.sendTXT(num, "OK");
+      }
+
+      // = ==> Activate named mode
+      if (payload[0] == '=') {
+        // we get mode data
+        String str_mode = String((char *) &payload[0]);
+
+        handleSetNamedMode(str_mode);
+
+        DBG_OUTPUT_PORT.printf("Activated mode [%u]!\n", mode);
+        webSocket.sendTXT(num, "OK");
+      }
+
+      // $ ==> Get status Info.
+      if (payload[0] == '$') {
+        DBG_OUTPUT_PORT.printf("Get status info.");
+
+        String json = listStatusJSON();
+        DBG_OUTPUT_PORT.println(json);
+        webSocket.sendTXT(num, json);
+      }
+
+      // ~ ==> Get WS2812 modes.
+      if (payload[0] == '~') {
+        DBG_OUTPUT_PORT.printf("Get WS2812 modes.");
+
+        String json = listModesJSON();
+        DBG_OUTPUT_PORT.println(json);
+        webSocket.sendTXT(num, json);
+      }
+
+      // / ==> Set WS2812 mode.
+      if (payload[0] == '/') {
+        handleSetWS2812FXMode(payload);
+        webSocket.sendTXT(num, "OK");
+      }
+
+      // start auto cycling
+      if (strcmp((char *)payload, "start") == 0 ) {
+        handleAutoStart();
+        webSocket.sendTXT(num, "OK");
+      }
+
+      // stop auto cycling
+      if (strcmp((char *)payload, "stop") == 0 ) {
+        handleAutoStop();
+        webSocket.sendTXT(num, "OK");
+      }
+      
+      #ifdef ENABLE_HOMEASSISTANT
+        sendState();
+      #endif
+      
+      break;
+  }
+}
+
+void checkForRequests() {
+  webSocket.loop();
+  server.handleClient();
+}
+
 
 
 // ***************************************************************************
